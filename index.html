@@ -39,6 +39,16 @@
     #result {
       margin-top: 10px;
     }
+
+    #notepad {
+      width: 90%;
+      height: 75%;
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      overflow-y: scroll;
+    }
   </style>
 </head>
 <body>
@@ -48,34 +58,25 @@
     <div id="result"></div>
   </div>
 
+  <div id="notepad" contenteditable="true" placeholder="Write here..."></div>
+
   <script>
     function calculateResult() {
       const expression = document.getElementById('expression').value;
-      alert("Expresión ingresada: " + expression);
-      
       try {
-        // Reemplazos para manejar potencias y bases numéricas
-        const modifiedExpression = expression.replace(/\^/g, '**')
-                                             .replace(/\$/g, '0x')
-                                             .replace(/\bb([01]+)/gi, '0b$1')
-                                             .replace(/\bhex([0-9A-F]+)/gi, '0x$1');
-        alert("Expresión modificada: " + modifiedExpression);
-
-        // Evaluar la expresión de forma segura
-        const resultDecimal = new Function('return ' + modifiedExpression)();
-        alert("Resultado decimal: " + resultDecimal);
-
+        // Reemplazar ^ con **, $ con 0x, bnúmero con 0bNúmero, h o hex con 0x para evaluar potencias, números hexadecimales y binarios
+        const modifiedExpression = expression.replace(/\^/g, '**').replace(/\$/g, '0x').replace(/bnúmero/g, '0b').replace(/bin|0y|b|0b/gi, '0b').replace(/h|hex/gi, '0x');
+        const resultDecimal = eval(modifiedExpression);
         const resultHexadecimal = resultDecimal.toString(16).toUpperCase();
         const resultBinary = resultDecimal.toString(2);
 
-        document.getElementById('result').innerHTML = `
+        document.getElementById('result').innerHTML = 
           <p>Result:</p>
           <p>Dec | ${resultDecimal}</p>
           <p>Hex | ${resultHexadecimal}</p>
           <p>Bin | ${resultBinary}</p>
-        `;
+        ;
       } catch (error) {
-        alert("Error en la expresión: " + error.message);
         document.getElementById('result').innerText = 'Error in the expression';
       }
     }
