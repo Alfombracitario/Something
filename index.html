@@ -1,85 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor de Texto Simple</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
+      height: 100vh;
       display: flex;
       flex-direction: column;
+      font-family: sans-serif;
+    }
+    #toolbar {
+      background-color: #333;
+      padding: 10px;
+      color: white;
+      display: flex;
       align-items: center;
-      height: 100vh;
-      margin: 0;
     }
-
-    #calculator {
-      width: 300px;
+    #saveBtn {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    #editor {
+      flex: 1;
       padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    input {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 10px;
       font-size: 16px;
-      box-sizing: border-box;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-
-    #result {
-      margin-top: 10px;
-    }
-
-    #notepad {
-      width: 90%;
-      height: 75%;
-      margin-top: 20px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      overflow-y: scroll;
+      outline: none;
+      white-space: pre-wrap;
+      overflow-y: auto;
     }
   </style>
 </head>
 <body>
-  <div id="calculator">
-    <input type="text" id="expression" placeholder="Enter the expression">
-    <button onclick="calculateResult()">Calculate</button>
-    <div id="result"></div>
+
+  <div id="toolbar">
+    <button id="saveBtn">Guardar</button>
   </div>
 
-  <div id="notepad" contenteditable="true" placeholder="Write here..."></div>
+  <div id="editor" contenteditable="true">
+
+  </div>
 
   <script>
-    function calculateResult() {
-      const expression = document.getElementById('expression').value;
-      try {
-        // Reemplazar ^ con **, $ con 0x, bnúmero con 0bNúmero, h o hex con 0x para evaluar potencias, números hexadecimales y binarios
-        const modifiedExpression = expression.replace(/\^/g, '**').replace(/\$/g, '0x').replace(/bnúmero/g, '0b').replace(/bin|0y|b|0b/gi, '0b').replace(/h|hex/gi, '0x');
-        const resultDecimal = eval(modifiedExpression);
-        const resultHexadecimal = resultDecimal.toString(16).toUpperCase();
-        const resultBinary = resultDecimal.toString(2);
+    const saveBtn = document.getElementById('saveBtn');
+    const editor = document.getElementById('editor');
 
-        document.getElementById('result').innerHTML = 
-          <p>Result:</p>
-          <p>Dec | ${resultDecimal}</p>
-          <p>Hex | ${resultHexadecimal}</p>
-          <p>Bin | ${resultBinary}</p>
-        ;
-      } catch (error) {
-        document.getElementById('result').innerText = 'Error in the expression';
-      }
-    }
+    saveBtn.addEventListener('click', () => {
+      const text = editor.innerText;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mi_texto.txt';
+      a.click();
+
+      URL.revokeObjectURL(url);
+    });
   </script>
+
 </body>
 </html>
