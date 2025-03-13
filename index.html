@@ -1,70 +1,25 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor de Texto Simple</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      font-family: sans-serif;
-    }
-    #toolbar {
-      background-color: #333;
-      padding: 10px;
-      color: white;
-      display: flex;
-      align-items: center;
-    }
-    #saveBtn {
-      background-color: #4CAF50;
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    #editor {
-      flex: 1;
-      padding: 20px;
-      font-size: 16px;
-      outline: none;
-      white-space: pre-wrap;
-      overflow-y: auto;
-    }
-  </style>
+  <title>Editor de texto inutil</title>
 </head>
-<body>
+<body style="margin:0; padding:0; font-family:sans-serif;">
+  <!-- Formulario de envío -->
+  <form action="mailto:" method="post" enctype="text/plain">
+    
+    <!-- Campo para el mail del destinatario -->
+    <div style="padding: 10px; background-color: #f0f0f0;">
+      <label for="email">Enviar a:</label><br>
+      <input type="email" id="email" name="to" style="width:95%; font-size:1.2em;" required>
+      <br><br>
+      <!-- Botón de enviar -->
+      <input type="submit" value="Enviar" style="width:100%; padding:10px; font-size:1.2em;">
+    </div>
 
-  <div id="toolbar">
-    <button id="saveBtn">Guardar</button>
-  </div>
+    <!-- Área de texto para escribir -->
+    <textarea name="body" rows="30" style="width:100%; height:80vh; font-size:1.2em;"></textarea>
 
-  <div id="editor" contenteditable="true">
-
-  </div>
-
-  <script>
-    const saveBtn = document.getElementById('saveBtn');
-    const editor = document.getElementById('editor');
-
-    saveBtn.addEventListener('click', () => {
-      const text = editor.innerText;
-      const blob = new Blob([text], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'mi_texto.txt';
-      a.click();
-
-      URL.revokeObjectURL(url);
-    });
-  </script>
-
+  </form>
 </body>
 </html>
