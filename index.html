@@ -135,153 +135,192 @@
 </div>
 
 <script>
+// FREAKIN' TEXT RPG 2!!!
+// Sistema de escenas modular (state machine) para JS - funciones unificadas en cada escena
+
 document.addEventListener('DOMContentLoaded', () => {
-    // ——— Terminal ———
-    const termEl = document.getElementById('terminal-content');
-    function printf(text) {
-        termEl.textContent += text;
-        termEl.scrollTop = termEl.scrollHeight;
-    }
-    function clearScreen() {
-        termEl.textContent = '';
-    }
+  // ——— Terminal ———
+  const termEl = document.getElementById('terminal-content');
+  function printf(text) {
+    termEl.textContent += text;
+    termEl.scrollTop = termEl.scrollHeight;
+  }
+  function clearScreen() {
+    termEl.textContent = '';
+  }
 
-    // ——— Formateo de lista ———
-    function updateTextList(items, sel, cols) {
-        let rows = Math.ceil(items.length / cols);
-        let output = "";
-        for (let row = 0; row < rows; row++) {
-            let line = "";
-            for (let col = 0; col < cols; col++) {
-                let idx = row + col * rows;
-                if (idx < items.length) {
-                    let prefix = (sel === idx) ? "> " : "  ";
-                    let text = items[idx];
-                    while (text.length < 8) text += " ";
-                    line += prefix + text;
-                }
-            }
-            output += line.trimEnd() + "\n";
-        }
-        return output;
-    }
+  // ——— Variables globales de juego ———
+  let hp = 10, level = 1, xp = 0, xpNeed = 100, money = 0, mp = 0;
+  let inventory = [{ name: "nothing", damage: 0, price: 0 }];
+  let invCount = 1;
+  let place = 0;
 
-    // ——— Variables de juego ———
-    let hp = 10, level = 1, xp = 0, xpneed = 100, money = 0, mp = 0;
-    let screen = 0, selected = 0;
-    let inventory = [
-        {name : "nothing", damage : 0, price : 0},
-    ]
-    let inv_ic = 1; //inventory Item Count
-    const screenstats = 1;
-    const screenmenu = 0;
-    const screeninv = 2;
-    const menutext = ["Inv","Explore","Stats","Rest"];
+  // Constantes de lugares
+  const PLACE_FOREST = 0;
 
-    // ——— Input ———
-    let lastInput = null, previousKey = null;
-    const keyMap = {
-        'ArrowUp':    'U', 'ArrowDown':  'D',
-        'ArrowLeft':  'L', 'ArrowRight': 'R',
-        'Enter':      '+', ' ':          '-',
-        'z':          'A', 'x':          'B',
-        's':          '1', 'a':          '2'
-    };
-    // presionar
-    document.addEventListener('keydown', e => {
-        const m = keyMap[e.key];
-        if (m && m !== previousKey) {
-            lastInput = m; previousKey = m;
-        }
+  // ——— Input Handling ———
+  let lastInput = null, previousKey = null;
+  const keyMap = { ArrowUp:'U', ArrowDown:'D', ArrowLeft:'L', ArrowRight:'R', Enter:'+', ' ':'-', z:'A', x:'B', s:'1', a:'2' };
+  document.addEventListener('keydown', e => {
+    const code = keyMap[e.key];
+    if (code && code !== previousKey) { lastInput = code; previousKey = code; }
+  });
+  document.addEventListener('keyup', e => {
+    const code = keyMap[e.key]; if (code === previousKey) previousKey = null;
+  });
+  const btnMap = { 'btn-up':'U','btn-down':'D','btn-left':'L','btn-right':'R','btn-start':'+','btn-select':'-','btn-a':'A','btn-b':'B','btn-1':'1','btn-2':'2' };
+  Object.entries(btnMap).forEach(([id, code]) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', () => {
+      if (code !== previousKey) {
+        lastInput = code;
+        previousKey = code;
+        setTimeout(() => previousKey = null, 100);
+      }
     });
-    // soltar
-    document.addEventListener('keyup', e => {
-        const m = keyMap[e.key];
-        if (m && m === previousKey) previousKey = null;
-    });
-    // táctiles
-    const btnMap = {
-        'btn-up':'U','btn-down':'D','btn-left':'L','btn-right':'R',
-        'btn-start':'+','btn-select':'-',
-        'btn-a':'A','btn-b':'B','btn-1':'1','btn-2':'2'
-    };
-    Object.entries(btnMap).forEach(([id, code]) => {
-        document.getElementById(id)?.addEventListener('click', () => {
-            if (code !== previousKey) {
-                lastInput = code;
-                previousKey = code;
-                // liberar previousKey tras 100 ms para simular keyup
-                setTimeout(() => { previousKey = null; }, 100);
-            }
-        });
-    });
+  });
 
-    //lógica del juego
-
-    // ——— Dibujar menú e info ———
-    function draw_menu() {
-        printf(updateTextList(menutext, selected, 2));
-    }
-    function draw_info() {
-        printf("|Info|\n");
-        printf(`[HP:${hp} MP:${mp}] [LV:${level} XP:${(xp/xpneed*100).toFixed(0)}%]\n[$:${money}]\n\n`);
-    }
-
-    function draw_inv() {
-        printf("|Inventory|\n");
-        for(let i = 0; i < inv_ic; i++)
-        {
-            printf("\n"+string(inventory[i].name));
+  // ——— Función auxiliar: formatea lista en columnas con flecha en índice ———
+  function formatList(items, sel, cols) {
+    // Sistema column-first: llena columnas antes de filas.
+    const rows = Math.ceil(items.length / cols);
+    let output = '';
+    for (let r = 0; r < rows; r++) {
+      let line = '';
+      for (let c = 0; c < cols; c++) {
+        const idx = r + c * rows;
+        if (idx < items.length) {
+          const prefix = (idx === sel) ? '> ' : '  ';
+          let txt = items[idx];
+          while (txt.length < 8) txt += ' ';
+          line += prefix + txt;
         }
-
+      }
+      output += line.trimEnd() + '\n';
     }
-    // ——— Inicio ———
-    clearScreen();
-    printf("FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n\n");
-    printf("Long ago there were knights, witches, and demons, but today only demons remain. \nYou, the last light knight have to defeat all the monsters and demons.\n\nPress any key to start the game.");
-    // ——— Lógica 16 ms ———
-    setInterval(() => {
-        if (lastInput) {
-            switch (screen) {
-                case screenmenu:
-                    if (lastInput === 'R') selected = (selected - 2 + menutext.length) % menutext.length;
-                    if (lastInput === 'L') selected = (selected + 2) % menutext.length;
-                    if (lastInput === 'U' && selected % 2 === 1) selected--;
-                    if (lastInput === 'D' && selected % 2 === 0 && selected + 1 < menutext.length) selected++;
-                    if (lastInput === 'A' || lastInput === '2')
-                    {
-                        switch(selected)
-                        {   
-                            case 3:
-                                screen = screenstats;
-                            break;
+    return output;
+  }
 
-                            case 1:
-                                screen = screeninv;
-                            break;
-                        }
-                    }
-                    clearScreen();
-                    printf("FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n\n");
-                    draw_menu();
-                    printf("\n");
-                    draw_info();
-                    break;
-                case screenstats:
-                    clearScreen();
-                    draw_info();
-                
-                case screeninv:
-                    clearScreen();
-                    draw_inv();
-                break;
-                // otros screens...
-            }
+  // ——— Sistema de escenas ———
+  const scenes = {
+    intro: {
+      enter() {
+        clearScreen();
+        printf("FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n\n");
+        printf("Long ago, there were knights, wizards, witches, and legends — tales of monsters lurking in the dark...\n\n");
+        printf("The knights, driven by glory and honor, held back the darkness for a time. But as the centuries passed, the legends faded. The monsters, however, remained — hiding in plain sight, their faces changed, their presence ignored.\n\n");
+        printf("Now, you, the last knight, have seen the truth. And whether it is madness or destiny, you know your purpose: take up the mantle, write your own legend, and stand against the shadows that still haunt this world.\n\n");
+        printf("-[Press any key to start]\n");
+      },
+      update(input) {
+        if (input) {
+          currentScene = scenes.menu;
+          currentScene.enter();
         }
-        lastInput = null;
-    }, 16);
+      }
+    },
+
+    menu: {
+      selected: 0,
+      options: ["Inv","Explore","Stats","Rest"],
+      cols: 2,
+      enter() {
+        this.selected = 0;
+        this.render();
+      },
+      update(input) {
+        const n = this.options.length;
+        if (input === 'L') this.selected = (this.selected + this.cols) % n;
+        if (input === 'R') this.selected = (this.selected - this.cols + n) % n;
+        if (input === 'U' && this.selected % this.cols === 1) this.selected--;
+        if (input === 'D' && this.selected % this.cols === 0 && this.selected + 1 < n) this.selected++;
+        if (input === 'A' || input === '2') {
+          switch (this.selected) {
+            case 0: currentScene = scenes.inventory; break;
+            case 1: currentScene = scenes.explore; break;
+            case 2: currentScene = scenes.stats; break;
+            case 3: currentScene = scenes.rest; break;
+          }
+          currentScene.enter();
+          return;
+        }
+        this.render();
+      },
+      render() {
+        clearScreen();
+        printf("FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n\n");
+        printf(formatList(this.options, this.selected, this.cols));
+      }
+    },
+
+    inventory: {
+      enter() {
+        clearScreen();
+        printf("[Inventory]\n");
+        for (let i = 0; i < invCount; i++) {
+          printf("|" + inventory[i].name + "\n");
+        }
+      },
+      update(input) {
+        if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
+      }
+    },
+
+    stats: {
+      enter() {
+        clearScreen();
+        printf("[Statistics]\n");
+        printf(`|HP:${hp} MP:${mp}] [LV:${level} XP:${((xp/xpNeed)*100).toFixed(0)}%]\n`);
+        printf(`[$:${money}]\n`);
+      },
+      update(input) {
+        if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
+      }
+    },
+
+    explore: {
+      enter() {
+        clearScreen();
+        switch (place) {
+          case PLACE_FOREST:
+            printf("You're in a forest, what you do now?\n");
+            printf("- Explore more (A)\n");
+            printf("- Back (B)\n");
+            break;
+        }
+      },
+      update(input) {
+        if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
+      }
+    },
+
+    rest: {
+      enter() {
+        clearScreen();
+        hp += 5;
+        printf("You rest and recover some HP...\n");
+        setTimeout(() => { currentScene = scenes.menu; currentScene.enter(); }, 1000);
+      },
+      update() {}
+    }
+  };
+
+  // Estado inicial
+  let currentScene = scenes.intro;
+  currentScene.enter();
+
+  // ——— Bucle de juego (16ms) ———
+  setInterval(() => {
+    if (lastInput) {
+      currentScene.update(lastInput);
+      lastInput = null;
+    }
+  }, 16);
+
+  // ——— Función aleatoria ———
+  function irng(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 });
-</script>
 
+</script>
 </body>
 </html>
