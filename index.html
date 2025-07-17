@@ -141,6 +141,14 @@
 document.addEventListener('DOMContentLoaded', () => {
   // ——— Terminal ———
   const termEl = document.getElementById('terminal-content');
+  const tline = "------------------";
+
+  // ——— Textos dinámicos ———
+  let sanity = "normal";
+  let textLV = "Level";
+  let textMagic = "Magic";
+  let textMP = "MP";
+  let textManaPot = "Mana potion";
   function printf(text) {
     termEl.textContent += text;
     termEl.scrollTop = termEl.scrollHeight;
@@ -150,13 +158,122 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ——— Variables globales de juego ———
-  let hp = 10, level = 1, xp = 0, xpNeed = 100, money = 0, mp = 0;
-  let inventory = [{ name: "nothing", damage: 0, price: 0 }];
+  let hp = 10, level = 1, xp = 0, xpNeed = 100, money = 0, mp = 10; defense = 0; damage = 1; skill = 1; maxhp = 10;
+  let inventory = [{ name: textManaPot, damage: 5, price: 5 }];
   let invCount = 1;
   let place = 0;
 
   // Constantes de lugares
   const PLACE_FOREST = 0;
+  // Enemigos
+const ENEMIES = {
+  evilwizard: {
+    names: {
+      normal: "Homeless",
+      insane: "Evil Wizard"
+    },
+    hp: 45,
+    atk: 2,
+    dialog: {
+      normal: {
+        intro: [
+          "Hey, I'm starving, I want to end this pain",
+          "Why are you looking at me like that?",
+          "This isn't how I imagined my last day..."
+        ],
+        hurt: [
+          "What's wrong with you?!",
+          "When I said I wanted to end my pain, I didn't mean that!",
+          "You monster! That HURTS!"
+        ],
+        lowHp: [
+          "Please, STOP! This hurts!",
+          "No more... no more...",
+          "I was just hungry..."
+        ],
+        death: [
+          "I didn't mean...",
+          "So cold...",
+          "You win..."
+        ],
+        spare: [
+          "You didn't helped me.",
+          "Why... would you let me go?",
+        ],
+        help: [
+          "Thanks, you're so nice.",
+          "Are you really going to help me after that?"
+        ]
+      },
+      insane: {
+        intro: [
+          "The evil wizard approaches.",
+        ],
+        hurt: [
+          "Pain makes me real.",
+          "You don't expect my next attack.",
+          "You don't scare me, weak knight."
+        ],
+        lowHp: [
+          "You're scaring me.",
+          "The colors taste like metal now.",
+          "I know your secret.",
+          "Stop, STOP",
+          "I'll kill you!"
+        ],
+        death: [
+          "You defeated me, but you won't kill the master.",
+          "Your scream joins his song.",
+          "He fades into ink."
+        ],
+        spare: [
+          "You're a disappointment. You'll never be a true knight.",
+        ],
+        help: [
+          "I can't believe you're helping me, that's so cowardly of you. "
+        ]
+      }
+    }
+  }
+};
+//funciones para peleas
+function randomDialog(part) {
+  const lines = currentEnemy.dialog[part];
+  if (!lines) return "[...]";
+  if (Array.isArray(lines)) {
+    return lines[irng(0, lines.length - 1)];
+  } else {
+    return lines; // fallback si accidentalmente es un string
+  }
+}
+function getEnemy(enemyId) {
+  const base = ENEMIES[enemyId];
+  if (!base) {
+    console.error("Enemy not found:", enemyId);
+    return null;
+  }
+
+  const state = sanity; // "normal" o "insane"
+
+  return {
+    id: enemyId,
+    name: base.names[state] || base.names.normal || "???",
+    maxHp: base.hp,
+    hp: base.hp,
+    atk: base.atk,
+    dialog: base.dialog[state],
+    
+    // Accede con: currentEnemy.say("intro") → devuelve línea aleatoria
+    say(part) {
+      const lines = this.dialog[part];
+      if (!lines) return "[...]";
+      if (Array.isArray(lines)) {
+        return lines[irng(0, lines.length - 1)];
+      }
+      return lines;
+    }
+  };
+}
 
   // ——— Input Handling ———
   let lastInput = null, previousKey = null;
@@ -249,7 +366,9 @@ document.addEventListener('DOMContentLoaded', () => {
       render() {
         clearScreen();
         printf("FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n\n");
+        printf(tline+"\n");
         printf(formatList(this.options, this.selected, this.cols));
+        printf(tline+"\n");
       }
     },
 
@@ -266,18 +385,73 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
 
-    stats: {
-      enter() {
+    stats: {// [ESCENA ESTADÍSTICAS]
+        selected : 0,
+        options : ["Max HP: ["+maxhp+"]","Base damage: ["+damage+"]","Base defense: ["+defense+"]","Exit >"],
+        cols : 1,
+      render(){
         clearScreen();
+        printf(tline+"\n");
         printf("[Statistics]\n");
-        printf(`|HP:${hp} MP:${mp}] [LV:${level} XP:${((xp/xpNeed)*100).toFixed(0)}%]\n`);
-        printf(`[$:${money}]\n`);
+        printf(tline+"\n");
+        printf("|HP: ["+hp+"]|\n");
+        printf("|"+textMP+": ["+mp+"]|\n");
+        printf("|Knight Level: ["+level+"] - XP:"+((xp/xpNeed)*100).toFixed(0)+"%|\n");
+        printf("|Money: [$"+money+"]|");
+
+        printf("\n"+tline);
+        printf("\n[Skills]\n");
+        printf("|Skill points: ["+skill+"]\n");
+        this.options = ["Max HP: ["+maxhp+"]","Base damage: ["+damage+"]","Base defense: ["+defense+"]","Exit >"]; //updates the list
+        printf(formatList(this.options, this.selected, this.cols));
+        printf(tline);
+      },
+      enter() {
+        this.render();
       },
       update(input) {
-        if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
+        if (input === 'B' || input === '1') { currentScene = scenes.menu; currentScene.enter(); }
+        if (input === 'U') {
+          if(this.selected > 0 ) {this.selected--;}
+          this.render();
+        }
+        if (input === 'D') {
+          if(this.selected < 3 ) {this.selected++;}
+          this.render();
+        }
+        if(input === 'A' || input === '2')
+        {
+          switch(this.selected)
+          {
+            case 0://Max HP
+              if(skill <= 0) {break;}
+              maxhp++;
+              skill--;
+              this.render();
+            break;
+
+            case 1://Base damage
+              if(skill <= 0) {break;}
+              damage++;
+              skill--;
+              this.render();
+            break;
+
+            case 2://Base defense
+              if(skill <= 0) {break;}
+              defense++;
+              skill--;
+              this.render();
+            break;
+
+            case 3://Exit
+              currentScene = scenes.menu;
+              currentScene.enter();
+            break;
+          }
+        }
       }
     },
-
     explore: {
       enter() {
         clearScreen();
@@ -290,15 +464,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       },
       update(input) {
+        if (input === 'A' || input === '2')
+        {
+          printf("Explorando!11\n");
+        }
         if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
       }
     },
-
-    rest: {
+    fight : {
+      selected : 0,
+      options : ["Attack","Magic","Defend","Let Go"],
+      render()
+      {
+        printf("-Fight-");
+      },
       enter() {
         clearScreen();
-        hp += 5;
-        printf("You rest and recover some HP...\n");
+        
+      },
+      update(input)
+      {
+        
+      },
+      draw()
+      {
+
+      }
+    },
+    rest: {// [ESCENA REST]
+      enter() {
+        clearScreen();
+        if(hp < maxhp)
+        {
+          hp++;
+          printf("You rest and recover some HP...\n");
+        }
+        else
+        {
+          printf("Your health is full!");
+        }
         setTimeout(() => { currentScene = scenes.menu; currentScene.enter(); }, 1000);
       },
       update() {}
