@@ -165,8 +165,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Constantes de lugares
   const PLACE_FOREST = 0;
+  const enemylist = [
+    [//Forest
+      "evilwizard",
+      "slime"
+    ]
+  ];
   // Enemigos
 const ENEMIES = {
+  slime: {
+
+  },
   evilwizard: {
     names: {
       normal: "Homeless",
@@ -230,7 +239,7 @@ const ENEMIES = {
           "You're a disappointment. You'll never be a true knight.",
         ],
         help: [
-          "I can't believe you're helping me, that's so cowardly of you. "
+          "I can't believe you're helping me... that's so cowardly of you. "
         ]
       }
     }
@@ -246,6 +255,7 @@ function randomDialog(part) {
     return lines; // fallback si accidentalmente es un string
   }
 }
+
 function getEnemy(enemyId) {
   const base = ENEMIES[enemyId];
   if (!base) {
@@ -453,21 +463,30 @@ function getEnemy(enemyId) {
       }
     },
     explore: {
+      selected : 0,
+      options : ["Look for something new", "Insert a list of known places"],
       enter() {
         clearScreen();
         switch (place) {
           case PLACE_FOREST:
             printf("You're in a forest, what you do now?\n");
-            printf("- Explore more (A)\n");
+            printf("- Find a new place\n");
             printf("- Back (B)\n");
             break;
         }
       },
       update(input) {
         if (input === 'A' || input === '2')
-        {
-          printf("Explorando!11\n");
-        }
+        { currentScene = scenes.exploring; currentScene.enter(); }
+        if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
+      }
+    },
+    exploring : {
+      enter() {
+        printf("You found: ");
+        printf("A nothing.");
+      },
+      update(input) {
         if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
       }
     },
