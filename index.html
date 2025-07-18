@@ -1,9 +1,9 @@
-<!DOCTYPE html><html lang="es">
+<!DOCTYPE html><html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Juego Terminal RPG</title>
+    <title>Who reads the tab name... oh wait, fuck. somehow, you actually did it even if this name didn't fit completly, that's crazy, man.</title>
     <style>
         /* VARIABLES PERSONALIZABLES */
         :root {
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tline = "------------------";
 
   // ——— Textos dinámicos ———
-  let sanity = "normal";
+  let sanity = "insane";
   let textLV = "Level";
   let textMagic = "Magic";
   let textMP = "MP";
@@ -161,20 +161,29 @@ document.addEventListener('DOMContentLoaded', () => {
   let hp = 10, level = 1, xp = 0, xpNeed = 100, money = 0, mp = 10; defense = 0; damage = 1; skill = 1; maxhp = 10;
   let inventory = [{ name: textManaPot, damage: 5, price: 5 }];
   let invCount = 1;
-  let place = 0;
+  let place = "forest";
 
   // Constantes de lugares
-  const PLACE_FOREST = "Forest";
-  const PLACE_CITY = "City";
-  const PLACE_SHOP = "Shop";
-  const PLACE_CAVE = "Cave";
-  let known_places = [PLACE_FOREST];
-  const enemylist = [
-    [//Forest
-      "evilwizard",
-      "slime"
-    ]
-  ];
+  const Places = {
+    forest: {
+      name: "Forest",
+      enemies: ["evilwizard"]
+    },
+    city: {
+      name: "City",
+      enemies: ["trashcan"]
+    },
+    shop: {
+      name: "Shop",
+      enemies: []
+    },
+    cave: {
+      name: "Cave",
+      enemies: []
+    }
+  };
+  // Lugares conocidos ahora son claves del objeto Places
+  let known_places = ["forest"];
   // Enemigos
 const ENEMIES = {
     trashcan: {
@@ -188,7 +197,7 @@ const ENEMIES = {
       dialog: {
         normal: {
           intro: [
-            "A trash can!!"
+            "A trash can!"
           ],
           hurt: [
             "plonk"
@@ -204,6 +213,9 @@ const ENEMIES = {
           ],
           help: [
             "You clean the trash, you are a good person"
+          ],
+          attack: [
+            "..."
           ]
         },
         insane: {
@@ -216,7 +228,7 @@ const ENEMIES = {
             "You will never get the loot that i stole"
           ],
           lowHp: [
-            "What... Mi armor its supposed to be indestructible",
+            "What... My armor it's supposed to be indestructible",
             "(nervous) You should stop, your attacks are not dealing any damage",
             "your attacks will never work",
             "I AM INMORTAL"
@@ -231,6 +243,11 @@ const ENEMIES = {
           ],
           help: [
             "Ok, i will let you carry my stuff"
+          ],
+          attack: [
+            "Only I can steal from weak people like you, knight.",
+            "Not because you're poor you can steal my stuff, that's my work!",
+            "Not becuase I steal I'll hurt you."
           ]
         }
       }
@@ -245,6 +262,7 @@ const ENEMIES = {
     },
     hp: 45,
     atk: 2,
+    helpercent : 1,
     dialog: {
       normal: {
         intro: [
@@ -274,6 +292,9 @@ const ENEMIES = {
         help: [
           "Thanks, you're so nice.",
           "Are you really going to help me after that?"
+        ],
+        attack: [
+          "I don't trust you."
         ]
       },
       insane: {
@@ -295,13 +316,16 @@ const ENEMIES = {
         death: [
           "You defeated me, but you won't kill the master.",
           "Your scream joins his song.",
-          "He fades into ink."
+          "I'll fade into ink."
         ],
         spare: [
           "You're a disappointment. You'll never be a true knight.",
         ],
         help: [
           "I can't believe you're helping me... that's so cowardly of you. "
+        ],
+        attack: [
+          "You will never be able to grasp the true of the evil wizards."
         ]
       }
     }
@@ -531,7 +555,8 @@ function getEnemy(enemyId) {
       get options() {
         const opts = ["Look for something new"];
         for (let i = 0; i < known_places.length; i++) {
-          opts.push("go to " + known_places[i]);
+          const key = known_places[i];
+          opts.push("go to " + Places[key].name);
         }
         return opts;
       },
@@ -545,20 +570,40 @@ function getEnemy(enemyId) {
       },
 
       update(input) {
-        if(input === 'U')
-        {
+        if(input === 'U') {
           this.selected--;
           this.selected = Math.max(this.selected,0);
           this.render();
         }
-        if(input === 'D')
-        {
+        if(input === 'D') {
           this.selected++;
-          this.selected = Math.min(this.selected,known_places.length);
+          this.selected = Math.min(this.selected, known_places.length);
           this.render();
         }
         if (input === 'A' || input === '2') {
-          currentScene = scenes.exploring; scenes.exploring.enter();
+          this.render();
+          if(this.selected === 0) {//si selecciona buscar algo nuevo,
+            let random = irng(1,10);
+            if(random === 1) { //busca un lugar nuevo (10%)
+              const allKeys = Object.keys(Places);
+              const notKnown = allKeys.filter(k => !known_places.includes(k));
+              if(notKnown.length > 0) {
+                const newKey = notKnown[irng(0, notKnown.length-1)];
+                known_places.push(newKey);
+                printf("\nYou found a new place: " + Places[newKey].name + "!\n");
+              } else {
+                printf("There is nothing more to explore.\n");
+              }
+            }
+            else {// Empieza una pelea en el lugar actual
+              currentScene = scenes.fight; currentScene.enter();
+            }
+
+          } else {//se eligió ir a otro lugar
+            place = known_places[this.selected-1];
+            currentScene = scenes.exploring; currentScene.enter();
+          }
+          
         }
         if (input === 'B') {
           currentScene = scenes.menu;
@@ -569,9 +614,7 @@ function getEnemy(enemyId) {
     exploring : {
       render() {
         clearScreen();
-        printf("You are exploring...\n");
-        printf("You can find a new place or an enemy.\n");
-        printf("Press A to fight or B to go back.\n");
+        printf(place);
       },
       enter() {
           this.render();
@@ -582,19 +625,65 @@ function getEnemy(enemyId) {
     },
 
     fight : {
+      currentEnemy : 0,
       selected : 0,
-      options : ["Attack","Magic","Defend","Let Go"],
+      options : ["Attack",textMagic,"Defend","Let Go","Help"],
+      cols : 5,
       render()
       {
-        printf("-Fight-");
+        clearScreen();
+        printf("[Fight]");
+        printf("\n"+tline+tline+tline+"\n");
+        printf(formatList(this.options, this.selected, this.cols));
+        printf(tline+tline+tline+"\n");
+        //info del jugador
+        printf("HP: "+hp);
+        printf("\n"+tline+tline+tline+"\n");
+      },
+      enter()
+      {
+        let enemies = Places[place].enemies;
+        let enemyId = enemies[irng(0, enemies.length - 1)];
+        currentEnemy = getEnemy(enemyId);
+        this.render();
+        if(currentEnemy) printf(currentEnemy.say("intro"));
       },
       update(input)
       {
-        
+        if(input === 'A')
+        {
+          //primero, el enemigo ataca
+          this.render();
+          printf("The "+currentEnemy.name+" says:\n   |");
+          printf(currentEnemy.say("attack")+"\n");
+
+          printf("You lose: "+currentEnemy.atk+" Hp!\n");
+          takeDamage();
+          printf(tline+"\n");
+          switch(this.selected)
+          {
+            case 0://attack
+              printf("You attack the "+currentEnemy.name+",\nloses: "+damage+"HP!\n");
+              currentEnemy.hp -= damage;
+
+              printf(tline+"\n")
+              printf("the "+currentEnemy.name+" says:\n   |"+currentEnemy.say("hurt"));
+            break;
+          }
+        }
       },
       draw()
       {
 
+      },
+      takeDamage()
+      {
+        hp-=currentEnemy.atk;
+        if(hp < 0)
+        {
+          printf("You are dead. you lose all your money.");
+          money = 0;
+        }
       }
     },
     rest: {// [ESCENA REST]
