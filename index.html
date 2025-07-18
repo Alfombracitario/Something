@@ -164,7 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let place = 0;
 
   // Constantes de lugares
-  const PLACE_FOREST = 0;
+  const PLACE_FOREST = "Forest";
+  const PLACE_CITY = "City";
+  const PLACE_SHOP = "Shop";
+  const PLACE_CAVE = "Cave";
+  let known_places = [PLACE_FOREST];
   const enemylist = [
     [//Forest
       "evilwizard",
@@ -173,6 +177,64 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
   // Enemigos
 const ENEMIES = {
+    trashcan: {
+      names: {
+        normal: "Trash can",
+        insane: "Armored dwarf"
+      },
+      hp: 45,
+      atk: 2,
+      helpercent : 1,
+      dialog: {
+        normal: {
+          intro: [
+            "A trash can!!"
+          ],
+          hurt: [
+            "plonk"
+          ],
+          lowHp: [
+            "PLONK!!"
+          ],
+          death: [
+            "destroyed trashcan sounds"
+          ],
+          spare: [
+            "...This is awkward"
+          ],
+          help: [
+            "You clean the trash, you are a good person"
+          ]
+        },
+        insane: {
+          intro: [
+            "You found a armored dwarft with a bag of stolen goods.",
+          ],
+          hurt: [
+            "My armor is inpenetrable, you cannot hurt me",
+            "I dont need to run, because my armor is the best armor that has ever existed",
+            "You will never get the loot that i stole"
+          ],
+          lowHp: [
+            "What... Mi armor its supposed to be indestructible",
+            "(nervous) You should stop, your attacks are not dealing any damage",
+            "your attacks will never work",
+            "I AM INMORTAL"
+          ],
+          death: [
+            "But..... my armor...",
+            "You will never...",
+            "At least you cant use my armor"
+          ],
+          spare: [
+            "So you now realize you cant inflict damage to me",
+          ],
+          help: [
+            "Ok, i will let you carry my stuff"
+          ]
+        }
+      }
+    },
   slime: {
 
   },
@@ -463,43 +525,68 @@ function getEnemy(enemyId) {
       }
     },
     explore: {
-      selected : 0,
-      options : ["Look for something new", "Insert a list of known places"],
-      enter() {
-        clearScreen();
-        switch (place) {
-          case PLACE_FOREST:
-            printf("You're in a forest, what you do now?\n");
-            printf("- Find a new place\n");
-            printf("- Back (B)\n");
-            break;
+      selected: 0,
+      cols: 1,
+
+      get options() {
+        const opts = ["Look for something new"];
+        for (let i = 0; i < known_places.length; i++) {
+          opts.push("go to " + known_places[i]);
         }
+        return opts;
       },
+      render() {
+        clearScreen();
+        printf("Explore: \n");
+        printf(formatList(this.options, this.selected, this.cols));
+      },
+      enter() {
+        this.render();
+      },
+
       update(input) {
-        if (input === 'A' || input === '2')
-        { currentScene = scenes.exploring; currentScene.enter(); }
-        if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
+        if(input === 'U')
+        {
+          this.selected--;
+          this.selected = Math.max(this.selected,0);
+          this.render();
+        }
+        if(input === 'D')
+        {
+          this.selected++;
+          this.selected = Math.min(this.selected,known_places.length);
+          this.render();
+        }
+        if (input === 'A' || input === '2') {
+          currentScene = scenes.exploring; scenes.exploring.enter();
+        }
+        if (input === 'B') {
+          currentScene = scenes.menu;
+          currentScene.enter();
+        }
       }
     },
     exploring : {
+      render() {
+        clearScreen();
+        printf("You are exploring...\n");
+        printf("You can find a new place or an enemy.\n");
+        printf("Press A to fight or B to go back.\n");
+      },
       enter() {
-        printf("You found: ");
-        printf("A nothing.");
+          this.render();
       },
       update(input) {
-        if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
+        if (input === 'B' || input === '2') { currentScene = scenes.explore; currentScene.enter(); }
       }
     },
+
     fight : {
       selected : 0,
       options : ["Attack","Magic","Defend","Let Go"],
       render()
       {
         printf("-Fight-");
-      },
-      enter() {
-        clearScreen();
-        
       },
       update(input)
       {
