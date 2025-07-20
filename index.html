@@ -1,138 +1,202 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Who reads the tab name... oh wait, fuck. somehow, you actually did it even if this name didn't fit completly, that's crazy, man.</title>
-    <style>
-        /* VARIABLES PERSONALIZABLES */
-        :root {
-            --terminal-bg: #000;
-            --terminal-text: #0f0;
-            --terminal-aspect: 4/3;
-            --button-bg: #333;
-            --button-active: #555;
-            --button-text: #fff;
-            --button-size: 64px;
-            --button-gap: 8px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; user-select: none; }
-        body {
-            background: #111;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            font-family: 'Courier New', monospace;
-            padding: 10px;
-        }
-        #game-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-            gap: 15px;
-        }
-        #terminal {
-            background: var(--terminal-bg);
-            color: var(--terminal-text);
-            font-size: 12px;
-            line-height: 1.4;
-            padding: 15px;
-            border: 2px solid #333;
-            border-radius: 8px;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-            aspect-ratio: var(--terminal-aspect);
-            min-height: 0;
-        }
-        #terminal-content {
-            white-space: pre-wrap;
-            word-break: break-word;
-            height: 100%;
-            overflow: auto;
-            display: block;
-        }
-        #controls {
-            padding: 5px 0 15px;
-        }
-        .button-row {
-            display: flex;
-            justify-content: center;
-            gap: var(--button-gap);
-            margin-bottom: var(--button-gap);
-        }
-        .button-cell {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            max-width: calc(var(--button-size) * 1.5);
-        }
-        .btn {
-            width: var(--button-size);
-            height: var(--button-size);
-            border-radius: 50%;
-            background: var(--button-bg);
-            color: var(--button-text);
-            border: 2px solid #000;
-            font-size: 24px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.1s;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
-        }
-        .btn:active {
-            background: var(--button-active);
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 rgba(0,0,0,0.3);
-        }
-        #btn-up::after    { content: "↑"; }
-        #btn-down::after  { content: "↓"; }
-        #btn-left::after  { content: "←"; }
-        #btn-right::after { content: "→"; }
-        #btn-a::after     { content: "A"; }
-        #btn-b::after     { content: "B"; }
-        #btn-1::after     { content: "1"; }
-        #btn-2::after     { content: "2"; }
-        #btn-select::after{ content: "SEL"; font-size: 16px; }
-        #btn-start::after { content: "STA"; font-size: 16px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Freakein epirk text ER PI GI</title>
+  <style>
+    :root {
+      --terminal-bg: #000;
+      --terminal-text: #0f0;
+      --terminal-aspect: 4/3;
+      --button-bg: #333;
+      --button-active: #555;
+      --button-text: #fff;
+      --button-size: 64px;
+      --button-gap: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    body {
+      background: #111;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: 'Courier New', monospace;
+    }
+
+    #game-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+
+    body.desktop #game-container {
+      gap: 0;
+    }
+
+    #terminal {
+      background: var(--terminal-bg);
+      color: var(--terminal-text);
+      padding: 15px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: var(--terminal-aspect);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      width: 100%;
+      max-height: 100%;
+      max-width: calc(100vh * (4 / 3));
+    }
+
+    #terminal-content {
+      white-space: pre;
+      word-break: break-word;
+      overflow: auto;
+      width: 100%;
+      height: 100%;
+      font-family: inherit;
+    }
+
+    #controls {
+      padding: 5px 0 15px;
+    }
+
+    body.desktop #controls {
+      display: none;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      gap: var(--button-gap);
+      margin-bottom: var(--button-gap);
+    }
+
+    .button-cell {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      max-width: calc(var(--button-size) * 1.5);
+    }
+
+    .btn {
+      width: var(--button-size);
+      height: var(--button-size);
+      border-radius: 50%;
+      background: var(--button-bg);
+      color: var(--button-text);
+      border: 2px solid #000;
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.1s;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+    }
+
+    .btn:active {
+      background: var(--button-active);
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+    }
+
+    #btn-up::after    { content: "↑"; }
+    #btn-down::after  { content: "↓"; }
+    #btn-left::after  { content: "←"; }
+    #btn-right::after { content: "→"; }
+    #btn-a::after     { content: "A"; }
+    #btn-b::after     { content: "B"; }
+    #btn-1::after     { content: "1"; }
+    #btn-2::after     { content: "2"; }
+    #btn-select::after{ content: "SEL"; font-size: 16px; }
+    #btn-start::after { content: "STA"; font-size: 16px; }
+  </style>
 </head>
 <body>
-    <div id="game-container"><div id="terminal">
-        <div id="terminal-content">El juego no ha sido cargado aún</div>
+  <div id="game-container">
+    <div id="terminal">
+      <div id="terminal-content">
+Welcome to the Wii-style terminal!
+This font size adjusts to always show 80×30 characters.
+      </div>
     </div>
-    
     <div id="controls">
-        <!-- Tus controles aquí -->
-        <div class="button-row">
-            <div class="button-cell"><button class="btn" id="btn-1"></button></div>
-            <div class="button-cell"><button class="btn" id="btn-up"></button></div>
-            <div class="button-cell"><button class="btn" id="btn-2"></button></div>
-        </div>
-        <div class="button-row">
-            <div class="button-cell"><button class="btn" id="btn-left"></button></div>
-            <div class="button-cell"><button class="btn" id="btn-select"></button></div>
-            <div class="button-cell"><button class="btn" id="btn-right"></button></div>
-        </div>
-        <div class="button-row">
-            <div class="button-cell"><button class="btn" id="btn-a"></button></div>
-            <div class="button-cell"><button class="btn" id="btn-down"></button></div>
-            <div class="button-cell"><button class="btn" id="btn-b"></button></div>
-        </div>
-        <div class="button-row">
-            <div class="button-cell"></div>
-            <div class="button-cell"><button class="btn" id="btn-start"></button></div>
-            <div class="button-cell"></div>
-        </div>
+      <div class="button-row"><div class="button-cell"><div id="btn-up" class="btn"></div></div></div>
+      <div class="button-row">
+        <div class="button-cell"><div id="btn-left" class="btn"></div></div>
+        <div class="button-cell"><div id="btn-down" class="btn"></div></div>
+        <div class="button-cell"><div id="btn-right" class="btn"></div></div>
+      </div>
+      <div class="button-row">
+        <div class="button-cell"><div id="btn-a" class="btn"></div></div>
+        <div class="button-cell"><div id="btn-b" class="btn"></div></div>
+      </div>
+      <div class="button-row">
+        <div class="button-cell"><div id="btn-1" class="btn"></div></div>
+        <div class="button-cell"><div id="btn-2" class="btn"></div></div>
+      </div>
+      <div class="button-row">
+        <div class="button-cell"><div id="btn-select" class="btn"></div></div>
+        <div class="button-cell"><div id="btn-start" class="btn"></div></div>
+      </div>
     </div>
-</div>
+  </div>
+
+  <script>
+    // Detectar si es PC
+    const isDesktop = () => !/android|iphone|ipad|ipod|mobile|tablet|touch/i.test(navigator.userAgent);
+    if (isDesktop()) {
+      document.body.classList.add("desktop");
+    }
+
+    // Ajustar fuente para simular 80x30 terminal
+    function adjustFontSize() {
+      const terminal = document.getElementById("terminal");
+      const content = document.getElementById("terminal-content");
+
+      if (!terminal || !content) return;
+
+      const cols = 80;
+      const rows = 30;
+
+      const width = terminal.clientWidth;
+      const height = terminal.clientHeight;
+
+      const charWidth = width / cols;
+      const charHeight = height / rows;
+
+      const fontSize = Math.min(charWidth, charHeight);
+      content.style.fontSize = fontSize + "px";
+      content.style.lineHeight = "1.0";
+    }
+
+    // Ejecutar al cargar y al redimensionar
+    window.addEventListener("load", adjustFontSize);
+    window.addEventListener("resize", adjustFontSize);
+  </script>
+</body>
+</html>
+
 
 <script>
 // FREAKIN' TEXT RPG 2!!!
