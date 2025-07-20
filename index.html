@@ -149,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let textMagic = "Magic";
   let textMP = "MP";
   let textManaPot = "Mana potion";
+  let textXpPot = "Xp potion"
   function printf(text) {
     termEl.textContent += text;
     termEl.scrollTop = termEl.scrollHeight;
@@ -191,8 +192,8 @@ const ENEMIES = {
         normal: "Trash can",
         insane: "Armored dwarf"
       },
-      hp: 45,
-      atk: 2,
+      hp: 50,
+      atk: 1,
       helpercent : 1,
       dialog: {
         normal: {
@@ -247,22 +248,24 @@ const ENEMIES = {
           attack: [
             "Only I can steal from weak people like you, knight.",
             "Not because you're poor you can steal my stuff, that's my work!",
-            "Not becuase I steal I'll hurt you."
+            "I don't attack you, my strong armor makes your hands hurt"
           ]
         }
       }
     },
-  slime: {
-
-  },
   evilwizard: {
     names: {
       normal: "Homeless",
       insane: "Evil Wizard"
     },
-    hp: 45,
+    hp: 15,
     atk: 2,
     helpercent : 1,
+    loot: {
+      xp : 5,
+      money : 0,
+      items : [textXpPot,textManaPot]
+    },
     dialog: {
       normal: {
         intro: [
@@ -325,7 +328,79 @@ const ENEMIES = {
           "I can't believe you're helping me... that's so cowardly of you. "
         ],
         attack: [
-          "You will never be able to grasp the true of the evil wizards."
+          "You will never be able to grasp the true power of the evil wizards.",
+          "You won't survive from this"
+        ]
+      }
+    }
+  },
+  Mushroom: {
+    names: {
+      normal: "Mushroom",
+      insane: "Malicious mushroom"
+    },
+    hp: 5,
+    atk: 0,
+    helpercent : 0,
+    loot: {
+      xp : 5,
+      money : 0,
+      items : [textXpPot]
+    },
+    dialog: {
+      normal: {
+        intro: [
+          "..."
+        ],
+        hurt: [
+          "*Mushroom sounds*"
+        ],
+        lowHp: [
+          "..."
+        ],
+        death: [
+          "*Destroyed mushroom sounds*"
+        ],
+        spare: [
+          "..."
+        ],
+        help: [
+          "..."
+        ],
+        attack: [
+          "..."
+        ]
+      },
+      insane: {
+        intro: [
+          "The evil wizard approaches.",
+        ],
+        hurt: [
+          "Pain makes me real.",
+          "You don't expect my next attack.",
+          "You don't scare me, weak knight."
+        ],
+        lowHp: [
+          "You're scaring me.",
+          "The colors taste like metal now.",
+          "I know your secret.",
+          "Stop, STOP",
+          "I'll kill you!"
+        ],
+        death: [
+          "You defeated me, but you won't kill the master.",
+          "Your scream joins his song.",
+          "I'll fade into ink."
+        ],
+        spare: [
+          "You're a disappointment. You'll never be a true knight.",
+        ],
+        help: [
+          "I can't believe you're helping me... that's so cowardly of you. "
+        ],
+        attack: [
+          "You will never be able to grasp the true power of the evil wizards.",
+          "You won't survive from this"
         ]
       }
     }
@@ -420,9 +495,7 @@ function getEnemy(enemyId) {
       enter() {
         clearScreen();
         printf("FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n\n");
-        printf("Long ago, there were knights, wizards, witches, and legends — tales of monsters lurking in the dark...\n\n");
-        printf("The knights, driven by glory and honor, held back the darkness for a time. But as the centuries passed, the legends faded. The monsters, however, remained — hiding in plain sight, their faces changed, their presence ignored.\n\n");
-        printf("Now, you, the last knight, have seen the truth. And whether it is madness or destiny, you know your purpose: take up the mantle, write your own legend, and stand against the shadows that still haunt this world.\n\n");
+        printf("I'm to lazy to write the lore of the game now\n");
         printf("-[Press any key to start]\n");
       },
       update(input) {
@@ -658,7 +731,7 @@ function getEnemy(enemyId) {
           printf(currentEnemy.say("attack")+"\n");
 
           printf("You lose: "+currentEnemy.atk+" Hp!\n");
-          takeDamage();
+          //
           printf(tline+"\n");
           switch(this.selected)
           {
@@ -670,19 +743,29 @@ function getEnemy(enemyId) {
               printf("the "+currentEnemy.name+" says:\n   |"+currentEnemy.say("hurt"));
             break;
           }
+          this.takeDamage();
+          //revisar si se ha ganado la pelea
+          if(currentEnemy.hp < 1)
+          {
+            printf(currentEnemy.say("death"));
+            printf("\nYou defeated "+currentEnemy+"!");
+
+          }
         }
       },
       draw()
       {
-
       },
       takeDamage()
       {
         hp-=currentEnemy.atk;
         if(hp < 0)
         {
-          printf("You are dead. you lose all your money.");
+          let enemyName = currentEnemy.name;
           money = 0;
+          currentScene = scenes.menu;
+          currentScene.enter();
+          printf("\n"+enemyName+" killed you, after resting you recovered your health but lost half of your money");
         }
       }
     },
