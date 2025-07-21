@@ -106,7 +106,7 @@
 </head>
 <body>
     <div id="game-container"><div id="terminal">
-        <div id="terminal-content">El juego no ha sido cargado aún</div>
+        <div id="terminal-content">This text is supposed to be repleaced when you start the game, If you can see it maybe your browser isn't suppoerted :/</div>
     </div>
     
     <div id="controls">
@@ -149,7 +149,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let textMagic = "Magic";
   let textMP = "MP";
   let textManaPot = "Mana potion";
-  let textXpPot = "Xp potion"
+  let textXpPot = "Xp potion";
+  let textPlaceDragonest = "Dragon's nest";
+
+  function setnormal()
+  {
+    sanity = "normal";
+    textLV = "Madness";
+    textMagic = "Acting";
+    textMP = "AL"//Alcohol level
+    //Tuve que investigar para poner estos nombres jajaj
+    textManaPot = "Vodka";
+    textXpPot = "Psilocibina";//Droga
+    textPlaceDragonest = "Airport";
+  }
   function printf(text) {
     termEl.textContent += text;
     termEl.scrollTop = termEl.scrollHeight;
@@ -168,11 +181,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const Places = {
     forest: {
       name: "Forest",
-      enemies: ["evilwizard"]
+      enemies: ["evilwizard","lostkid","mushroom"],
+      items : []
     },
     city: {
       name: "City",
-      enemies: ["trashcan"]
+      enemies: ["trashcan"],
+      items : []
     },
     shop: {
       name: "Shop",
@@ -180,11 +195,17 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     cave: {
       name: "Cave",
-      enemies: []
+      enemies: [],
+      items : []
+    },
+    dragonest: {
+      name : textPlaceDragonest,
+      enemies: [],
+      items : []
     }
+
   };
-  // Lugares conocidos ahora son claves del objeto Places
-  let known_places = ["forest"];
+let known_places = ["forest"];
   // Enemigos
 const ENEMIES = {
     trashcan: {
@@ -249,6 +270,85 @@ const ENEMIES = {
             "Only I can steal from weak people like you, knight.",
             "Not because you're poor you can steal my stuff, that's my work!",
             "I don't attack you, my strong armor makes your hands hurt"
+          ]
+        }
+      }
+    },
+    lostkid: {
+      names: {
+        normal: "Lost Kid",
+        insane: "Forest Goblin"
+      },
+      hp: 6,
+      atk: 1,
+      helpercent: 1,
+      loot: {
+        xp: 2,
+        money: 1,
+        items: []
+      },
+      dialog: {
+        normal: {
+          intro: [
+            "I'm cold... are you a bad guy?",
+            "I... I heard scary voices out here..."
+          ],
+          hurt: [
+            "Oww! That hurt!",
+            "Why would you do that?!",
+            "I thought you were helping me!"
+          ],
+          lowHp: [
+            "Stop! Please!",
+            "You're hurting me!",
+            "I just want to go home..."
+          ],
+          death: [
+            "M-mom...",
+            "I don’t wanna... disappear...",
+            "I’m sorry..."
+          ],
+          spare: [
+            "T-thank you... I'll find my way...",
+            "You’re not a bad person?"
+          ],
+          help: [
+            "Really? You'll help me?",
+            "Thank you... I feel safe now."
+          ],
+          attack: [
+            "I won’t trust anyone ever again!"
+          ]
+        },
+        insane: {
+          intro: [
+            "The forest goblin leaps from the bushes!",
+            "A trickster appears, grinning with sharp teeth!"
+          ],
+          hurt: [
+            "What out, there is a distraction!",
+            "Behind you!",
+          ],
+          lowHp: [
+            "My leaves... they wither...",
+            "Your blade cuts too deep!"
+          ],
+          death: [
+            "I return to bark and shadow...",
+            "The forest will remember...",
+            "You saw through my disguise!"
+          ],
+          spare: [
+            "You fool! I was never truly here.",
+            "A wise move, knight... or was it?"
+          ],
+          help: [
+            "Helping a goblin? That's... unexpected.",
+            "You must be madder than *me*."
+          ],
+          attack: [
+            "Hehehe! Die with giggles!",
+            "I bite like squirrel!"
           ]
         }
       }
@@ -334,7 +434,7 @@ const ENEMIES = {
       }
     }
   },
-  Mushroom: {
+  mushroom: {
     names: {
       normal: "Mushroom",
       insane: "Malicious mushroom"
@@ -373,34 +473,25 @@ const ENEMIES = {
       },
       insane: {
         intro: [
-          "The evil wizard approaches.",
+          "The Malicious mushroom is here.",
         ],
         hurt: [
-          "Pain makes me real.",
-          "You don't expect my next attack.",
-          "You don't scare me, weak knight."
+          "That hurts!",
         ],
         lowHp: [
-          "You're scaring me.",
-          "The colors taste like metal now.",
-          "I know your secret.",
-          "Stop, STOP",
-          "I'll kill you!"
+          "STOP, PLEASE. STOP!",
         ],
         death: [
-          "You defeated me, but you won't kill the master.",
-          "Your scream joins his song.",
-          "I'll fade into ink."
+          "I think that's all."
         ],
         spare: [
-          "You're a disappointment. You'll never be a true knight.",
+          "You can't even fight against a mushroom? you're a loser.",
         ],
         help: [
-          "I can't believe you're helping me... that's so cowardly of you. "
+          "Are you really trying to help a mushroom?"
         ],
         attack: [
-          "You will never be able to grasp the true power of the evil wizards.",
-          "You won't survive from this"
+          "Please get out, I can't even move."
         ]
       }
     }
@@ -554,7 +645,7 @@ function getEnemy(enemyId) {
       }
     },
 
-    stats: {// [ESCENA ESTADÍSTICAS]
+    stats: {
         selected : 0,
         options : ["Max HP: ["+maxhp+"]","Base damage: ["+damage+"]","Base defense: ["+defense+"]","Exit >"],
         cols : 1,
@@ -687,7 +778,9 @@ function getEnemy(enemyId) {
     exploring : {
       render() {
         clearScreen();
-        printf(place);
+        printf("Current place: ["+place+"]");
+
+        //aparece una lista de enemigos e items
       },
       enter() {
           this.render();
@@ -790,7 +883,6 @@ function getEnemy(enemyId) {
   // Estado inicial
   let currentScene = scenes.intro;
   currentScene.enter();
-
   // ——— Bucle de juego (16ms) ———
   setInterval(() => {
     if (lastInput) {
