@@ -8,7 +8,7 @@
         /* VARIABLES PERSONALIZABLES */
         :root {
             --terminal-bg: #000;
-            --terminal-text: #0f0;
+            --terminal-text: #fff;
             --terminal-aspect: 4/3;
             --button-bg: #333;
             --button-active: #555;
@@ -38,7 +38,7 @@
         #terminal {
             background: var(--terminal-bg);
             color: var(--terminal-text);
-            font-size: 12px;
+            font-size: 16px;
             line-height: 1.4;
             padding: 15px;
             border: 2px solid #333;
@@ -151,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let textManaPot = "Mana potion";
   let textXpPot = "Xp potion";
   let textPlaceDragonest = "Dragon's nest";
+  let textPlaceVillage = "Village"
 
   function setnormal()
   {
@@ -162,7 +163,54 @@ document.addEventListener('DOMContentLoaded', () => {
     textManaPot = "Vodka";
     textXpPot = "Psilocibina";//Droga
     textPlaceDragonest = "Airport";
+    textPlaceVillage = "City";
+    xpMult = 0;//solo por si acaso
   }
+  function removeItem(item) {
+  for (let i = 0; i < inventory.length; i++) {
+    if (inventory[i] === item) {
+      // Desplaza los elementos hacia la izquierda
+      for (let j = i; j < inventory.length - 1; j++) {
+        inventory[j] = inventory[j + 1];
+      }
+      inventory.length--; // Reduce el tamaño del array
+      return;
+    }
+  }
+  clearScreen();
+  printf("The item wasn't found, this is a bug.\n");
+}
+items = {//todos los items que existen
+  textManaPot : {
+    price : 0
+  },
+  textXpPot : {
+    price : 0
+  }
+}
+function useItem(item)
+  {
+    switch(item)
+    {
+      case textManaPot:
+        if(mp < maxMp)
+        {
+          mp = maxMp;
+          removeItem(item);
+        }
+        else
+        {
+          printf("You can't use this item, your "+textMP+" Is full!");
+        }
+      break;
+
+      case textXpPot:
+        xpMult*=1.1;
+        removeItem(item);
+      break;
+    }
+  }
+  //para imitar terminal
   function printf(text) {
     termEl.textContent += text;
     termEl.scrollTop = termEl.scrollHeight;
@@ -172,9 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ——— Variables globales de juego ———
-  let hp = 10, level = 1, xp = 0, xpNeed = 100, money = 0, mp = 10; defense = 0; damage = 1; skill = 1; maxhp = 10;
-  let inventory = [{ name: textManaPot, damage: 5, price: 5 }];
-  let invCount = 1;
+  let hp = 10, level = 1, xp = 0, xpNeed = 100, money = 15, mp = 10; defense = 0; damage = 1; skill = 1; maxhp = 10; xpMult = 1; maxMp = 10;
+  let inventory = [textManaPot, textXpPot];
+  let invCount = 2;
   let place = "forest";
 
   // Constantes de lugares
@@ -184,9 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
       enemies: ["evilwizard","lostkid","mushroom"],
       items : []
     },
-    city: {
-      name: "City",
-      enemies: ["trashcan"],
+    village: {
+      name: textPlaceVillage,
+      enemies: ["trashcan","evilwizard"],
       items : []
     },
     shop: {
@@ -305,19 +353,19 @@ const ENEMIES = {
           ],
           death: [
             "M-mom...",
-            "I don’t wanna... disappear...",
-            "I’m sorry..."
+            "I don't wanna... disappear...",
+            "I'm sorry..."
           ],
           spare: [
             "T-thank you... I'll find my way...",
-            "You’re not a bad person?"
+            "You're not a bad person?"
           ],
           help: [
             "Really? You'll help me?",
             "Thank you... I feel safe now."
           ],
           attack: [
-            "I won’t trust anyone ever again!"
+            "I won't trust anyone ever again!"
           ]
         },
         insane: {
@@ -633,12 +681,12 @@ function getEnemy(enemyId) {
     },
 
     inventory: {
+      selected : 0,
+      cols : 1,
       enter() {
         clearScreen();
         printf("[Inventory]\n");
-        for (let i = 0; i < invCount; i++) {
-          printf("|" + inventory[i].name + "\n");
-        }
+        printf(formatList(inventory, this.selected, this.cols));
       },
       update(input) {
         if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
@@ -793,8 +841,8 @@ function getEnemy(enemyId) {
     fight : {
       currentEnemy : 0,
       selected : 0,
-      options : ["Attack",textMagic,"Defend","Let Go","Help"],
-      cols : 5,
+      options : ["Attack",textMagic,"Defend","Let Go","Help","Items"],
+      cols : 6,
       render()
       {
         clearScreen();
@@ -816,33 +864,89 @@ function getEnemy(enemyId) {
       },
       update(input)
       {
+        if(input === 'R')
+        {
+          this.selected++;
+          this.render();
+        }
+        if(input === 'L')
+        {
+          this.selected--;
+          this.render();          
+        }
         if(input === 'A')
         {
-          //primero, el enemigo ataca
-          this.render();
-          printf("The "+currentEnemy.name+" says:\n   |");
-          printf(currentEnemy.say("attack")+"\n");
-
-          printf("You lose: "+currentEnemy.atk+" Hp!\n");
-          //
-          printf(tline+"\n");
-          switch(this.selected)
+          switch(this.selected)//Esto decide qué opción usaste
           {
             case 0://attack
+              //primero, el enemigo ataca
+              this.render();
+              printf("The "+currentEnemy.name+" says:\n   |");
+              printf(currentEnemy.say("attack")+"\n");
+
+              printf("You lose: "+currentEnemy.atk+" Hp!\n");
+              //
+              printf(tline+"\n");
+
               printf("You attack the "+currentEnemy.name+",\nloses: "+damage+"HP!\n");
               currentEnemy.hp -= damage;
 
               printf(tline+"\n")
               printf("the "+currentEnemy.name+" says:\n   |"+currentEnemy.say("hurt"));
             break;
+
+            case 1://Mp
+              this.render();
+              printf("You don't know magic yet lol");//placeholder
+            break;
+
+            case 2://Defend
+              this.render();
+              printf("You try to defend, a nothing happens");//placeholder
+            break;
+
+            case 3: //let go
+              this.render();
+              printf(currentEnemy.say(spare));
+            break;
+
+            case 4: //help
+              this.render();
+              printf(currentEnemy.say(help));
+            break;
+
+            case 5:
+              this.render();
+              printf("You don't have enought time to check your inv");
+            break;
           }
           this.takeDamage();
           //revisar si se ha ganado la pelea
           if(currentEnemy.hp < 1)
           {
+            currentScene = scenes.menu; currentScene.enter();
             printf(currentEnemy.say("death"));
             printf("\nYou defeated "+currentEnemy+"!");
 
+            
+            let random = irng(0,1);
+            if(random === 1)
+            {//dar drops
+              //Sin terminar
+            }
+            //dar XP
+            xp+= currentEnemy.xp*xpMult;
+            while(xp > xpNeed)
+            {
+              level++;
+              xp-=xpNeed;
+              xpNeed*=((xpNeed+4)*0.1);
+              skill++;
+              printf("\nLevel up!\n");
+              printf("Your current level is: "+level);
+              printf("\nNow you have: "+skill+" Skill points!");
+
+            }
           }
         }
       },
@@ -859,6 +963,7 @@ function getEnemy(enemyId) {
           currentScene = scenes.menu;
           currentScene.enter();
           printf("\n"+enemyName+" killed you, after resting you recovered your health but lost half of your money");
+          hp = maxhp
         }
       }
     },
