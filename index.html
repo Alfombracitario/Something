@@ -148,8 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let textLV = "Level";
   let textMagic = "Magic";
   let textMP = "MP";
-  let textManaPot = "Mana potion";
-  let textXpPot = "Xp potion";
   let textPlaceDragonest = "Dragon's nest";
   let textPlaceVillage = "Village"
 
@@ -160,11 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
     textMagic = "Acting";
     textMP = "AL"//Alcohol level
     //Tuve que investigar para poner estos nombres jajaj
-    textManaPot = "Vodka";
-    textXpPot = "Psilocibina";//Droga
     textPlaceDragonest = "Airport";
     textPlaceVillage = "City";
-    textAncestralSword = "Ancestral sword"
     xpMult = 0;//solo por si acaso
   }
   function removeItem(item) {
@@ -182,32 +177,15 @@ document.addEventListener('DOMContentLoaded', () => {
   printf("The item wasn't found, this is a bug.\n");
 }
 items = {//todos los items que existen
-  textManaPot : {
+  ManaPot : {
     price : 15,
-    desc : "Infuses you with the spark needed to channel arcane forces."
-  },
-  textXpPot : {
-    price : 15,
-    desc : "Helps you to get into the next level!"
-  },
-  textAncestralSword : {
-    price : 10,
-    damage : 2,
-    desc : "It looks like a long wooden stick."
-  },
-  Stone : {
-    price : 10,
-    damage : 1,
-    desc : "It's normal stone."
-  }
-  
-}
-function useItem(item)
-  {
-    switch(item)
-    {
-      case textManaPot:
-        if(mp < maxMp)
+    desc : "Infuses you with the spark needed to channel arcane forces.",
+    name : {
+      normal : "Vodka",
+      insane : "Mana potion"
+    },
+    use() {
+      if(mp < maxMp)
         {
           mp = maxMp;
           removeItem(item);
@@ -216,9 +194,45 @@ function useItem(item)
         {
           printf("You can't use this item, your "+textMP+" Is full!");
         }
+    }
+  },
+  XpPot : {
+    price : 15,
+    desc : "Helps you to get into the next level!",
+    name : {
+      normal : "Psilocibina",//Droga
+      insane : "Xp potion"
+    }
+  },
+  AncestralSword : {
+    price : 10,
+    damage : 2,
+    desc : "It looks like a long wooden stick.",
+    name : {
+      normal : "Stick",
+      insane : "Ancestral sword"
+    }
+  },
+  Stone : {
+    price : 10,
+    damage : 1,
+    desc : "It's normal stone.",
+    name : {
+      normal : "Stone",
+      insane : "Stone"
+    } 
+  }
+  
+}
+function useItem(item)
+  {
+    switch(item)
+    {
+      case "ManaPot":
+        
       break;
 
-      case textXpPot:
+      case "XpPot":
         xpMult*=1.1;
         removeItem(item);
       break;
