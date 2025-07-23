@@ -164,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     textXpPot = "Psilocibina";//Droga
     textPlaceDragonest = "Airport";
     textPlaceVillage = "City";
+    textAncestralSword = "Ancestral sword"
     xpMult = 0;//solo por si acaso
   }
   function removeItem(item) {
@@ -182,11 +183,24 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 items = {//todos los items que existen
   textManaPot : {
-    price : 0
+    price : 15,
+    desc : "Infuses you with the spark needed to channel arcane forces."
   },
   textXpPot : {
-    price : 0
+    price : 15,
+    desc : "Helps you to get into the next level!"
+  },
+  textAncestralSword : {
+    price : 10,
+    damage : 2,
+    desc : "It looks like a long wooden stick."
+  },
+  Stone : {
+    price : 10,
+    damage : 1,
+    desc : "It's normal stone."
   }
+  
 }
 function useItem(item)
   {
@@ -406,7 +420,7 @@ const ENEMIES = {
       normal: "Homeless",
       insane: "Evil Wizard"
     },
-    hp: 15,
+    hp: 10,
     atk: 2,
     helpercent : 1,
     loot: {
@@ -572,6 +586,7 @@ function getEnemy(enemyId) {
     hp: base.hp,
     atk: base.atk,
     dialog: base.dialog[state],
+    helpercent : base.helpercent,
     
     // Accede con: currentEnemy.say("intro") → devuelve línea aleatoria
     say(part) {
@@ -907,12 +922,37 @@ function getEnemy(enemyId) {
 
             case 3: //let go
               this.render();
-              printf(currentEnemy.say(spare));
+              printf(currentEnemy.say("spare"));
             break;
 
             case 4: //help
               this.render();
-              printf(currentEnemy.say(help));
+              
+              if(money > 0)
+              {
+                printf("You give "+(Math.round(money*0.1))+"$ to "+currentEnemy.name+"\n");
+                money -= Math.round(money*0.1);
+
+                let random = irng(0,100)*0.01;
+                if(currentEnemy.helpercent >= random)
+                {
+                  printf(currentEnemy.say("help"));
+                    setTimeout(() => {
+                    currentScene = scenes.exploring;
+                    currentScene.enter();
+                    }, 2000); // espera 2 segundos
+                    return;
+                }
+                else
+                {
+                  printf("It didn't work!\n");
+                }
+              }
+              else
+              {
+                printf("You're too poor to give money to "+currentEnemy.name+"\n");
+              }
+              
             break;
 
             case 5:
@@ -924,9 +964,9 @@ function getEnemy(enemyId) {
           //revisar si se ha ganado la pelea
           if(currentEnemy.hp < 1)
           {
-            currentScene = scenes.menu; currentScene.enter();
+            clearScreen();
             printf(currentEnemy.say("death"));
-            printf("\nYou defeated "+currentEnemy+"!");
+            printf("\nYou defeated "+currentEnemy.name+"!");
 
             
             let random = irng(0,1);
@@ -947,6 +987,11 @@ function getEnemy(enemyId) {
               printf("\nNow you have: "+skill+" Skill points!");
 
             }
+            setTimeout(() => {
+              currentScene = scenes.exploring;
+              currentScene.enter();
+            }, 2000); // espera 2 segundos
+            return;
           }
         }
       },
