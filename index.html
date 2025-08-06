@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Who reads the tab name... oh wait, fuck. somehow, you actually did it even if this name didn't fit completly, that's crazy, man.</title>
+    <title>This is supposed to be a title.</title>
     <style>
         /* VARIABLES PERSONALIZABLES */
         :root {
@@ -202,6 +202,10 @@ items = {//todos los items que existen
     name : {
       normal : "Psilocibina",//Droga
       insane : "Xp potion"
+    },
+    use() {
+        xpMult*=1.1;
+        removeItem(item);
     }
   },
   AncestralSword : {
@@ -211,6 +215,9 @@ items = {//todos los items que existen
     name : {
       normal : "Stick",
       insane : "Ancestral sword"
+    },
+    use() {
+      
     }
   },
   Stone : {
@@ -220,24 +227,17 @@ items = {//todos los items que existen
     name : {
       normal : "Stone",
       insane : "Stone"
-    } 
+    },
+    use() {
+      
+    }
   }
   
 }
 function useItem(item)
-  {
-    switch(item)
-    {
-      case "ManaPot":
-        
-      break;
-
-      case "XpPot":
-        xpMult*=1.1;
-        removeItem(item);
-      break;
-    }
-  }
+{
+  item.use();
+}
   //para imitar terminal
   function printf(text) {
     termEl.textContent += text;
@@ -257,21 +257,21 @@ function useItem(item)
   const Places = {
     forest: {
       name: "Forest",
-      enemies: ["evilwizard","lostkid","mushroom"],
+      enemies: ["lostkid","mushroom"],
       items : []
     },
     village: {
       name: textPlaceVillage,
-      enemies: ["trashcan","evilwizard"],
+      enemies: ["trashcan","evilwizard","steve","mimicdoor","lostkid","evilbread"],
       items : []
     },
     shop: {
       name: "Shop",
-      enemies: []
+      enemies: ["rich"]
     },
     cave: {
       name: "Cave",
-      enemies: [],
+      enemies: ["mushroom"],
       items : []
     },
     dragonest: {
@@ -291,6 +291,11 @@ const ENEMIES = {
       },
       hp: 50,
       atk: 1,
+      loot : {
+        xp: 10,
+        money: 10,
+        items: []
+      },
       helpercent : 1,
       dialog: {
         normal: {
@@ -359,7 +364,7 @@ const ENEMIES = {
       atk: 1,
       helpercent: 1,
       loot: {
-        xp: 2,
+        xp: 4,
         money: 1,
         items: []
       },
@@ -438,7 +443,7 @@ const ENEMIES = {
     atk: 2,
     helpercent : 1,
     loot: {
-      xp : 5,
+      xp : 15,
       money : 0,
       items : ["XpPot","ManaPot"]
     },
@@ -510,6 +515,270 @@ const ENEMIES = {
       }
     }
   },
+  steve: {
+      names: {
+        normal: "Regular guy named steve",
+        insane: "Regular guy named steve"
+      },
+      hp: 20,
+      atk: 2,
+      helpercent : 1,
+      loot: {
+        xp: 10,
+        money: 15,
+        items: []
+      },
+      dialog: {
+        normal: {
+          intro: [
+            "Hi, i am steve"
+          ],
+          hurt: [
+            "Why did you hit me???",
+            "You are a bad person....",
+            "Stop, that hurts"
+          ],
+          lowHp: [
+            "Why are you like this",
+            "Please, dont kill me, i have a wife and two kids"
+          ],
+          death: [
+            "Whyyyyyyyy"
+          ],
+          spare: [
+            "Thank you for sparing me....."
+          ],
+          help: [
+            "Thank god you are a good person"
+          ],
+          attack: [
+            "If you want a figth, you will have a figth",
+            "Super steve punch"
+          ]
+        },
+        insane: {
+          intro: [
+            "You see a random guy, but he looks like someone from the dark side",
+          ],
+          hurt: [
+            "Why did you hit me???",
+            "You are a bad person....",
+            "Stop, that hurts"
+          ],
+          lowHp: [
+            "Why are you like this",
+            "Please, dont kill me, i have a wife and two kids"
+          ],
+          death: [
+            "Whyyyyyyyy"
+          ],
+          spare: [
+            "Thank you for sparing me....."
+          ],
+          help: [
+            "Thank god you are a good person"
+          ],
+          attack: [
+            "If you want a figth, you will have a figth",
+            "Super steve punch"
+          ]
+        }
+      }
+    },
+    evilbread: {
+      names: {
+        normal: "Baby",
+        insane: "Evil bread "
+      },
+      hp: 5,
+      atk: 5,
+      helpercent : 1,
+      loot: {
+        xp: 20,
+        money: 0,
+        items: []
+      },
+      dialog: {
+        normal: {
+          intro: [
+            "you go near a baby car, and see a baby"
+          ],
+          hurt: [
+            "Waaaaaaaaaaaa"
+          ],
+          lowHp: [
+            "WAAAAAAAAAAAAAAAA"
+          ],
+          death: [
+            "Baby being thorn in half sounds"
+          ],
+          spare: [
+            "Waaaaaaa?"
+          ],
+          help: [
+            "(happy)Waaaaa!!"
+          ],
+          attack: [
+            "Someone approaches and hits you."
+          ]
+        },
+        insane: {
+          intro: [
+            "You see a evil bread in his cart of doom",
+          ],
+          hurt: [
+            "You think you can stop the EVIL BREAD??",
+            "Your attacks cant stop my magic"
+          ],
+          lowHp: [
+            "NOOOO, I...AM....ETERNAL"
+          ],
+          death: [
+            "Now that you defeated me, you can eat me"
+          ],
+          spare: [
+            "If you spare me, i will take over the world"
+          ],
+          help: [
+            "Sooner or later i will take over the world, and it will be your fault for letting me live"
+          ],
+          attack: [
+            "Super dark bread MAGIC"
+          ]
+        }
+      }
+    },
+      mimicdoor: {
+      names: {
+        normal: "Wall",
+        insane: "Mimic door "
+      },
+      hp: 50,
+      atk: 1,
+      helpercent : 1,
+      loot: {
+        xp: 15,
+        money: 0,
+        items: []
+      },
+      dialog: {
+        normal: {
+          intro: [
+            "You see a wall...."
+          ],
+          hurt: [
+            " "
+          ],
+          lowHp: [
+            " "
+          ],
+          death: [
+            "You broke a part of the wall, congratulations"
+          ],
+          spare: [
+            " "
+          ],
+          help: [
+            " "
+          ],
+          attack: [
+            "A stone fell in your foot"
+          ]
+        },
+        insane: {
+          intro: [
+            "You try to get troug a door, but it was a mimic",
+          ],
+          hurt: [
+            "ROAAAAAAAAAAAAAAAR",
+            "ROAAAAAAAAR"
+          ],
+          lowHp: [
+            "(pants)Roaaar"
+          ],
+          death: [
+            "The mimic, gets destroyed and dissapears"
+          ],
+          spare: [
+            "I will not let you live, its to late to apologise"
+          ],
+          help: [
+            "You shall get out of my sigth and never return"
+          ],
+          attack: [
+            "Door bite"
+          ]
+        }
+      }
+    },
+   rich: {
+      names: {
+        normal: "Banker",
+        insane: "Rich bad guy"
+      },
+      hp: 20,
+      atk: 20,
+      loot: {
+        xp: 2,
+        money: 1000,
+        items: []
+      },
+      helpercent : 1,
+      dialog: {
+        normal: {
+          intro: [
+            "Hello, and welcome to the bank, how can i help you"
+          ],
+          hurt: [
+            "I WILL CALL THE POLICE",
+            "SECURITY",
+            "SOMEONE HELP ME"
+          ],
+          lowHp: [
+            "Please dont kill me",
+            "I surrender, you can get the money"
+          ],
+          death: [
+            "Why did you kill me?"
+          ],
+          spare: [
+            "I will help you if you dont hurt anybody"
+          ],
+          help: [
+            "Here you have the money"
+          ],
+          attack: [
+            "Did you really think I wasn't prepared for this?"
+          ]
+        },
+        insane: {
+          intro: [
+            "Im the richest of all, your chivalry cant beat my money",
+          ],
+          hurt: [
+            "Nothing that the money cant fix",
+            "You are making mad de most powerfull men of all"
+          ],
+          lowHp: [
+            "Please stop.I will pay you",
+            "If you decide to retreat, i will forgive you"
+          ],
+          death: [
+            "My money was suppposed to save me...."
+          ],
+          spare: [
+            "Thank you for being so considerate"
+          ],
+          help: [
+            "Here you got some money, for our friendship"
+          ],
+          attack: [
+            "MONEY IS POWER",
+            "rich hit!"
+          ]
+        }
+      }
+    },
   mushroom: {
     names: {
       normal: "Mushroom",
@@ -601,6 +870,7 @@ function getEnemy(enemyId) {
     atk: base.atk,
     dialog: base.dialog[state],
     helpercent : base.helpercent,
+    loot : base.loot,
     
     // Accede con: currentEnemy.say("intro") → devuelve línea aleatoria
     say(part) {
@@ -709,16 +979,40 @@ function getEnemy(enemyId) {
       }
     },
 
-    inventory: {
+    inventory: {//inventory screen, no
       selected : 0,
       cols : 1,
-      enter() {
+      render()
+      {
         clearScreen();
         printf("[Inventory]\n");
-        printf(formatList(inventory, this.selected, this.cols));
+        //crea una copia del inventario pero con nombres distintos
+            // Crea una copia del inventario con nombres según el modo de locura
+        let _inv = inventory.map(itemName => {
+            const item = items[itemName];
+            return item.name[sanity ? "insane" : "normal"];
+        });
+        printf(formatList(_inv, this.selected, this.cols));
+      },
+      enter() {
+        this.render();
       },
       update(input) {
         if (input === 'B') { currentScene = scenes.menu; currentScene.enter(); }
+        if (input === 'U')
+        {
+          if (this.selected > 0){this.selected--; this.render();}
+        }
+        if (input === 'D')
+        {
+          if (this.selected < inventory.length-1){this.selected++; this.render();}
+        }
+        if (input === '1'){
+          this.render();
+          printf("\nItem info: \n");
+          let iname = inventory[this.selected];
+          printf(items[iname].desc);
+        }
       }
     },
 
@@ -981,15 +1275,14 @@ function getEnemy(enemyId) {
             clearScreen();
             printf(currentEnemy.say("death"));
             printf("\nYou defeated "+currentEnemy.name+"!");
-
-            
+            printf("\nYou got: "+currentEnemy.loot.xp+" points!");
             let random = irng(0,1);
             if(random === 1)
             {//dar drops
               //Sin terminar
             }
             //dar XP
-            xp+= currentEnemy.xp*xpMult;
+            xp+= currentEnemy.loot.xp*xpMult;
             while(xp > xpNeed)
             {
               level++;
