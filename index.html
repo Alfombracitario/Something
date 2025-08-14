@@ -162,14 +162,13 @@ document.addEventListener('DOMContentLoaded', () => {
     textPlaceVillage = "City";
     xpMult = 0;//solo por si acaso
   }
-  function removeItem(item) {
+function removeItem(itemId) {
   for (let i = 0; i < inventory.length; i++) {
-    if (inventory[i] === item) {
-      // Desplaza los elementos hacia la izquierda
+    if (inventory[i] === itemId) {
       for (let j = i; j < inventory.length - 1; j++) {
         inventory[j] = inventory[j + 1];
       }
-      inventory.length--; // Reduce el tamaño del array
+      inventory.length--;
       return;
     }
   }
@@ -184,7 +183,7 @@ items = {//todos los items que existen
       normal : "Vodka",
       insane : "Mana potion"
     },
-    use() {
+    use(item) {
       if(mp < maxMp)
         {
           mp = maxMp;
@@ -203,7 +202,7 @@ items = {//todos los items que existen
       normal : "Psilocibina",//Droga
       insane : "Xp potion"
     },
-    use() {
+    use(item) {
         xpMult*=1.1;
         removeItem(item);
     }
@@ -216,7 +215,7 @@ items = {//todos los items que existen
       normal : "Stick",
       insane : "Ancestral sword"
     },
-    use() {
+    use(item) {
       
     }
   },
@@ -228,15 +227,14 @@ items = {//todos los items que existen
       normal : "Stone",
       insane : "Stone"
     },
-    use() {
+    use(item) {
       
     }
   }
   
 }
-function useItem(item)
-{
-  item.use();
+function useItem(itemId) {
+  items[itemId].use(itemId);
 }
   //para imitar terminal
   function printf(text) {
@@ -249,7 +247,7 @@ function useItem(item)
 
   // ——— Variables globales de juego ———
   let hp = 10, level = 1, xp = 0, xpNeed = 100, money = 15, mp = 10; defense = 0; damage = 1; skill = 1; maxhp = 10; xpMult = 1; maxMp = 10;
-  let inventory = ["XpPot", "ManaPot"];
+  let inventory = ["XpPot"];
   let invCount = 2;
   let place = "forest";
 
@@ -271,12 +269,12 @@ function useItem(item)
     },
     cave: {
       name: "Cave",
-      enemies: ["mushroom"],
+      enemies: ["mushroom","mimicdoor","lostkid"],
       items : []
     },
     dragonest: {
       name : textPlaceDragonest,
-      enemies: [],
+      enemies: ["dragon"] ,
       items : []
     }
 
@@ -515,6 +513,68 @@ const ENEMIES = {
       }
     }
   },
+    dragon: {
+      names: {
+        normal: "Plane",
+        insane: "Dragon"
+      },
+      hp: 500,
+      atk: 10,
+      helpercent : 0,
+      dialog: {
+        normal: {
+          intro: [
+            "Sir, Please step out of the way, we are about to take off"
+          ],
+          hurt: [
+            "Sir, please calm down",
+            "If you dont stop hitting the plane we are gonna call the police"
+          ],
+          lowHp: [
+            "You are damaging private propety, desist or we will sue you",
+            "Stop hitting the plane before anyone gets hurt"
+          ],
+          death: [
+            "Now we cant take off, thank you stupid"
+          ],
+          spare: [
+            "Ok... i guess, you should leave"
+          ],
+          help: [
+            "Sir, we do not need your help, we are professionals"
+          ],
+          attack: [
+            "Securityyyyyy"
+          ]
+        },
+        insane: {
+          intro: [
+            "You have just entered in a dragon territory",
+          ],
+          hurt: [
+            "Mi scales are stronger than your sword",
+            "Ouch, you attacked me"
+          ],
+          lowHp: [
+            "If you kill me, my people will be angry",
+            "You get a chance to leave before i get angry"
+          ],
+          death: [
+            "You dont know what you just did"
+          ],
+          spare: [
+            "I will let you live, but dont come back"
+          ],
+          help: [
+            "Ok, thank you for the help, but never come back"
+          ],
+          attack: [
+            "Breath of fire",
+            "Tail atack"
+          ]
+        }
+      }
+    },
   steve: {
       names: {
         normal: "Regular guy named steve",
@@ -930,11 +990,36 @@ function getEnemy(enemyId) {
   // ——— Sistema de escenas ———
   const scenes = {
     intro: {
-      enter() {
-        clearScreen();
-        printf("FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n\n");
-        printf("I'm to lazy to write the lore of the game now\n");
-        printf("-[Press any key to start]\n");
+      enter()
+      {
+        this.render();
+      },
+      render() {
+          clearScreen();
+          const lines = [
+              "FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n",
+              tline,
+              "\nlong before time had a name,\n",
+              "there was a great villa, with people who believed in magic and other anomalies; \n",
+              "in those times, people came to believe in things that surpassed science as we knew it.\n",
+              "\n",
+              "\nAfter a long time\n",
+              "all that magic ceased, leading society to stop believing in magic and chivalry.\n",
+              " The people, blinded by their indifference, could not see the different mystical events that occurred before their eyes. \n",
+              "\nHere begins your adventure, \n",
+              "as one of the few beings on this planet who believes that magic is very important and must be valued.\n",
+              "-[Press any key to start]\n"
+          ];
+
+          let i = 0;
+          function printNextLine() {
+              if (i < lines.length) {
+                  printf(lines[i]); // tu función para imprimir en la consola del juego
+                  i++;
+                  setTimeout(printNextLine, 1000); // 1000 ms = 1 segundo
+              }
+          }
+          printNextLine();
       },
       update(input) {
         if (input) {
@@ -972,20 +1057,22 @@ function getEnemy(enemyId) {
       },
       render() {
         clearScreen();
-        printf("FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n\n");
+        printf("FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n");
+        printf(tline+"\n")
+        printf("HP: ["+hp+"/"+maxhp+"]\n");
         printf(tline+"\n");
         printf(formatList(this.options, this.selected, this.cols));
         printf(tline+"\n");
       }
     },
 
-    inventory: {//inventory screen, no
+    inventory: {//inventory screen
       selected : 0,
       cols : 1,
       render()
       {
         clearScreen();
-        printf("[Inventory]\n");
+        printf("[Inventory]\n"+tline+"\n");
         //crea una copia del inventario pero con nombres distintos
             // Crea una copia del inventario con nombres según el modo de locura
         let _inv = inventory.map(itemName => {
@@ -1006,6 +1093,12 @@ function getEnemy(enemyId) {
         if (input === 'D')
         {
           if (this.selected < inventory.length-1){this.selected++; this.render();}
+        }
+        if(input == '2' || input == 'A')
+        {
+          useItem(inventory[this.selected]);//el programa no llega a esta línea pero si al evento
+          this.render();
+          printf("\nItem used.");//nunca se muestra
         }
         if (input === '1'){
           this.render();
@@ -1162,6 +1255,8 @@ function getEnemy(enemyId) {
     },
 
     fight : {
+      addedDef : 0,
+      addedDefCount : 0,
       currentEnemy : 0,
       selected : 0,
       options : ["Attack",textMagic,"Defend","Let Go","Help","Items"],
@@ -1225,7 +1320,10 @@ function getEnemy(enemyId) {
 
             case 2://Defend
               this.render();
-              printf("You try to defend, a nothing happens");//placeholder
+              this.addedDef += Math.max(1,defense*0.25-addedDefCount);
+              this.addedDefCount++;
+              printf("You try to defend, defense increased temporally in "+this.addedDef);
+
             break;
 
             case 3: //let go
@@ -1307,7 +1405,7 @@ function getEnemy(enemyId) {
       },
       takeDamage()
       {
-        hp-=currentEnemy.atk;
+        hp-=Math.max(currentEnemy.atk-(defense>>2));
         if(hp < 0)
         {
           let enemyName = currentEnemy.name;
