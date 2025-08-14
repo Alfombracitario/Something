@@ -995,6 +995,7 @@ function getEnemy(enemyId) {
         this.render();
       },
       render() {
+
           clearScreen();
           const lines = [
               "FREAKIN' TEXT RPG 2!!! | Alfombracitarioj\n",
@@ -1014,9 +1015,10 @@ function getEnemy(enemyId) {
           let i = 0;
           function printNextLine() {
               if (i < lines.length) {
-                  printf(lines[i]); // tu función para imprimir en la consola del juego
+                  if(currentScene !== scenes.intro){i = lines.length;}
+                  printf(lines[i]); 
                   i++;
-                  setTimeout(printNextLine, 1000); // 1000 ms = 1 segundo
+                  setTimeout(printNextLine, 500);
               }
           }
           printNextLine();
@@ -1373,14 +1375,14 @@ function getEnemy(enemyId) {
             clearScreen();
             printf(currentEnemy.say("death"));
             printf("\nYou defeated "+currentEnemy.name+"!");
-            printf("\nYou got: "+currentEnemy.loot.xp+" points!");
+            printf("\nYou got: "+Math.round(currentEnemy.loot.xp*xpMult)+" points!");
             let random = irng(0,1);
             if(random === 1)
             {//dar drops
               //Sin terminar
             }
             //dar XP
-            xp+= currentEnemy.loot.xp*xpMult;
+            xp+= Math.round(currentEnemy.loot.xp*xpMult);
             while(xp > xpNeed)
             {
               level++;
