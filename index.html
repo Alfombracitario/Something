@@ -246,7 +246,7 @@ function useItem(itemId) {
   }
 
   // ——— Variables globales de juego ———
-  let hp = 10, level = 1, xp = 0, xpNeed = 100, money = 15, mp = 10; defense = 0; damage = 1; skill = 1; maxhp = 10; xpMult = 1; maxMp = 10;
+  let hp = 10, level = 1, xp = 0, xpNeed = 10, money = 15, mp = 10; defense = 0; damage = 1; skill = 1; maxhp = 10; xpMult = 1; maxMp = 10;
   let inventory = ["XpPot"];
   let invCount = 2;
   let place = "forest";
@@ -776,8 +776,8 @@ const ENEMIES = {
         normal: "Banker",
         insane: "Rich bad guy"
       },
-      hp: 20,
-      atk: 20,
+      hp: 25,
+      atk: 10,
       loot: {
         xp: 2,
         money: 1000,
